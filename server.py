@@ -3,6 +3,12 @@ from flask import Flask, request, render_template
 import sqlite3
 from sqlite3 import Error
 
+
+import ocr
+import setCategory
+
+from datetime import datetime
+
 database = 'cashflowManagement.db'
 
 
@@ -67,9 +73,12 @@ def form():
         username = request.form['username']
         actual_item = request.form['actual_item']
         cost = request.form['cost']
-        date = request.form['date']
-        category = 'none for now'
+        date = datetime.today().strftime('%d-%m-%Y')
+        category = request.form['category']
+        if category == 'something weird':
+            category = setCategory.run_model(actual_item)
         formData = (username, category, actual_item, cost, date)
+        print(formData)
         insertIntoData(formData)
         return "cool"
     else:
@@ -81,6 +90,16 @@ def image():
     if request.method == 'POST':
         imagefile = request.files.get('imagefile', '')
         imagefile.save('img1.jpg')
+        result = ocr.runOCR('img1.jpg')
+        username = request.form['username']
+        for i in range(len(result[0])):
+            #   print(result[0][i], result[1][i])
+            actual_item = result[0][i]
+            cost = result[1][i]
+            category = setCategory.run_model(actual_item)
+            date = datetime.today().strftime('%d-%m-%Y')
+            formData = (username, category, actual_item, cost, date)
+            insertIntoData(formData)
         return "cool"
     else:
         return "weird"
@@ -97,4 +116,4 @@ def sms():
 
 
 if __name__ == '__main__':
-   app.run(debug=True)
+    app.run(debug=True)

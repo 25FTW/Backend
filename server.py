@@ -86,5 +86,15 @@ def image():
         return "weird"
 
 
+@app.route('/sms', methods=['POST'])
+def sms():
+    if request.method == 'POST':
+        username = request.form['username']
+        sms = request.form['sms']
+        return "cool"
+    else:
+        return "weird"
+
+
 if __name__ == '__main__':
    app.run(debug=True)

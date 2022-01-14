@@ -28,12 +28,18 @@ registerTable = """CREATE TABLE IF NOT EXISTS register (
 username text PRIMARY KEY NOT NULL,pswd text);"""
 
 datatable = """CREATE TABLE IF NOT EXISTS data (
-username text NOT NULL PRIMARY KEY,category text, actual_item text, cost text, date text,
+username text NOT NULL ,category text, actual_item text, cost text, date text,
+FOREIGN KEY (username) REFERENCES registerTable (username));
+"""
+
+budgetTable = """CREATE TABLE IF NOT EXISTS budgetTable (
+username text NOT NULL PRIMARY KEY,budget text,
 FOREIGN KEY (username) REFERENCES registerTable (username));
 """
 
 if conn:
     create_table(conn, registerTable)
     create_table(conn, datatable)
+    create_table(conn, budgetTable)
 else:
     print("cannot create tables.")

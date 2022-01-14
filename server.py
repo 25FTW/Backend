@@ -5,11 +5,43 @@ from sqlite3 import Error
 
 
 import ocr
-import setCategory
+import setCategory2
 
 from datetime import datetime
 
 database = 'cashflowManagement.db'
+
+
+def checkBalance(username):
+    conn = create_connection(database)
+    cur = conn.cursor()
+    cur.execute("SELECT cost FROM data")
+    x = []
+    for row in cur.fetchall():
+        x.append(float(row[0]))
+    s = sum(x)
+    print("in budget s = ", s)
+    cur.execute(
+        'SELECT COUNT(*) from budgetTable where username = ?', (username,))
+    cur_result = cur.fetchone()
+    if cur_result == 0:
+        z = 1000
+        print("in budget z = ", z)
+        if s > z:
+            return "budget crossed"
+        elif s == z or s+500 >= z:
+            return "close to exceeding the budget"
+        else:
+            "cool"
+    cur.execute("SELECT budget FROM budgetTable WHERE username = ?", (username,))
+    z = float(cur.fetchall()[0][0])
+    print("in budget z = ", z)
+    if s > z:
+        return "budget crossed"
+    elif s == z or s+500 >= z:
+        return "close to exceeding the budget"
+    else:
+        return "cool"
 
 
 def create_connection(db_file):
@@ -45,6 +77,17 @@ def insertIntoData(dataValue):
         print('item id:', cur.lastrowid)
 
 
+def insertIntoBudget(dataValue):
+    conn = create_connection(database)
+    with conn:
+        sql = """ INSERT INTO budgetTable(username,budget)
+              VALUES(?,?) """
+        cur = conn.cursor()
+        cur.execute(sql, dataValue)
+        conn.commit()
+        print('budget id:', cur.lastrowid)
+
+
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
@@ -67,6 +110,18 @@ def register():
         return "weird"
 
 
+@app.route('/setBudget', methods=['POST'])
+def setBudget():
+    if request.method == 'POST':
+        budget = request.form['budget']
+        username = request.form['username']
+        budgetData = (username, budget)
+        insertIntoBudget(budgetData)
+        return "cool"
+    else:
+        return "weird"
+
+
 @app.route('/form', methods=['POST'])
 def form():
     if request.method == 'POST':
@@ -76,11 +131,12 @@ def form():
         date = datetime.today().strftime('%d-%m-%Y')
         category = request.form['category']
         if category == 'something weird':
-            category = setCategory.run_model(actual_item)
+            category = setCategory2.run_model(actual_item)
         formData = (username, category, actual_item, cost, date)
         print(formData)
         insertIntoData(formData)
-        return "cool"
+        v = checkBalance(username)
+        return v
     else:
         return "weird"
 
@@ -96,9 +152,10 @@ def image():
             #   print(result[0][i], result[1][i])
             actual_item = result[0][i]
             cost = result[1][i]
-            category = setCategory.run_model(actual_item)
+            category = setCategory2.run_model(actual_item.lower())
             date = datetime.today().strftime('%d-%m-%Y')
             formData = (username, category, actual_item, cost, date)
+            print(formData)
             insertIntoData(formData)
         return "cool"
     else:
@@ -116,4 +173,5 @@ def sms():
 
 
 if __name__ == '__main__':
+    app.run(debug=True)
     app.run(debug=True)

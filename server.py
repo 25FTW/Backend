@@ -167,6 +167,8 @@ def sms():
     if request.method == 'POST':
         username = request.form['username']
         sms = request.form['sms']
+        actual_item = request.form['actual_item']
+        category = request.form['category']
         return "cool"
     else:
         return "weird"

@@ -37,9 +37,15 @@ username text NOT NULL PRIMARY KEY,budget text,
 FOREIGN KEY (username) REFERENCES registerTable (username));
 """
 
+logs = """CREATE TABLE IF NOT EXISTS logs (
+username text NOT NULL ,log text,
+FOREIGN KEY (username) REFERENCES registerTable (username));
+"""
+
 if conn:
     create_table(conn, registerTable)
     create_table(conn, datatable)
     create_table(conn, budgetTable)
+    create_table(conn, logs)
 else:
     print("cannot create tables.")

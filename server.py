@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template
-
+from flask import jsonify
 import sqlite3
 from sqlite3 import Error
 
@@ -28,19 +28,43 @@ def checkBalance(username):
         z = 1000
         print("in budget z = ", z)
         if s > z:
+            cur.execute(""" INSERT INTO logs(username,log)
+                  VALUES(?,?) """, (username, "budget exceeded"))
+            conn.commit()
+            print('notification id:', cur.lastrowid)
             return "budget crossed"
         elif s == z or s+500 >= z:
+            cur.execute(""" INSERT INTO logs(username,log)
+                  VALUES(?,?) """, (username, "close to exceeding the budget"))
+            conn.commit()
+            print('notification id:', cur.lastrowid)
             return "close to exceeding the budget"
         else:
-            "cool"
+            cur.execute(""" INSERT INTO logs(username,log)
+                  VALUES(?,?) """, (username, "transaction was under the budget"))
+            conn.commit()
+            print('notification id:', cur.lastrowid)
+            return "cool"
     cur.execute("SELECT budget FROM budgetTable WHERE username = ?", (username,))
     z = float(cur.fetchall()[0][0])
     print("in budget z = ", z)
     if s > z:
+        cur.execute(""" INSERT INTO logs(username,log)
+              VALUES(?,?) """, (username, "budget exceeded"))
+        conn.commit()
+        print('notification id:', cur.lastrowid)
         return "budget crossed"
     elif s == z or s+500 >= z:
+        cur.execute(""" INSERT INTO logs(username,log)
+              VALUES(?,?) """, (username, "close to exceeding the budget"))
+        conn.commit()
+        print('notification id:', cur.lastrowid)
         return "close to exceeding the budget"
     else:
+        cur.execute(" INSERT INTO logs(username,log) VALUES(?,?) ",
+                    (username, "transaction was under the budget"))
+        conn.commit()
+        print('notification id:', cur.lastrowid)
         return "cool"
 
 
@@ -64,6 +88,10 @@ def insertIntoRegister(dataValue):
         cur.execute(sql, dataValue)
         conn.commit()
         print('user id:', cur.lastrowid)
+        cur.execute(" INSERT INTO logs(username,log) VALUES(?,?) ",
+                    (dataValue[0], """Welcome, new user. Thankyou for choosing us."""))
+        conn.commit()
+        print('notification id:', cur.lastrowid)
 
 
 def insertIntoData(dataValue):
@@ -75,6 +103,10 @@ def insertIntoData(dataValue):
         cur.execute(sql, dataValue)
         conn.commit()
         print('item id:', cur.lastrowid)
+        cur.execute(""" INSERT INTO logs(username,log)
+              VALUES(?,?) """, (dataValue[0], """A new Transaction was done."""))
+        conn.commit()
+        print('notification id:', cur.lastrowid)
 
 
 def insertIntoBudget(dataValue):
@@ -86,6 +118,10 @@ def insertIntoBudget(dataValue):
         cur.execute(sql, dataValue)
         conn.commit()
         print('budget id:', cur.lastrowid)
+        cur.execute(""" INSERT INTO logs(username,log)
+              VALUES(?,?) """, (dataValue[0], "You added your budget!"))
+        conn.commit()
+        print('notification id:', cur.lastrowid)
 
 
 app = Flask(__name__)
@@ -105,7 +141,23 @@ def register():
         userData = (username, pswd)
         print(userData)
         insertIntoRegister(userData)
-        return "cool"
+        print(jsonify([1, 2, 3, 4, 5]))
+        return jsonify(["cool"])
+    else:
+        return "weird"
+
+
+@app.route('/getLogs', methods=['POST'])
+def getLogs():
+    if request.method == 'POST':
+        username = request.form['username']
+        conn = create_connection(database)
+        cur = conn.cursor()
+        cur.execute("SELECT log FROM logs where username=?", (username,))
+        x = [row[0] for row in cur.fetchall()]
+        '''v = {}
+        for i in range(x)'''
+        return jsonify(x[::-1])
     else:
         return "weird"
 

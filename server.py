@@ -64,8 +64,13 @@ def register():
 @app.route('/form', methods=['POST'])
 def form():
     if request.method == 'POST':
-        imagefile = request.files.get('imagefile', '')
-        imagefile.save('img1.jpg')
+        username = request.form['username']
+        actual_item = request.form['actual_item']
+        cost = request.form['cost']
+        date = request.form['date']
+        category = 'none for now'
+        formData = (username, category, actual_item, cost, date)
+        insertIntoData(formData)
         return "cool"
     else:
         return "weird"
@@ -74,6 +79,8 @@ def form():
 @app.route('/image', methods=['POST'])
 def image():
     if request.method == 'POST':
+        imagefile = request.files.get('imagefile', '')
+        imagefile.save('img1.jpg')
         return "cool"
     else:
         return "weird"

@@ -12,6 +12,49 @@ from datetime import datetime
 database = 'cashflowManagement.db'
 
 
+def getAnalysisData(username, month, year):
+    conn = create_connection(database)
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT category,cost,date FROM data where username=?", (username,))
+    categories = []
+    costs = []
+    for row in cur.fetchall():
+        if row[2].split('-')[1] == month and row[2].split('-')[2] == year:
+            categories.append(row[0])
+            costs.append(row[1])
+    v = {}
+    for i in range(len(costs)):
+        key = categories[i]
+        value = costs[i]
+        if key not in v.keys():
+            v[key] = float(value)
+        else:
+            v[key] += float(value)
+    return v
+
+
+def getAllAnalysisData(username):
+    conn = create_connection(database)
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT category,cost,date FROM data where username=?", (username,))
+    categories = []
+    costs = []
+    for row in cur.fetchall():
+        categories.append(row[0])
+        costs.append(row[1])
+    v = {}
+    for i in range(len(costs)):
+        key = categories[i]
+        value = costs[i]
+        if key not in v.keys():
+            v[key] = float(value)
+        else:
+            v[key] += float(value)
+    return v
+
+
 def checkBalance(username):
     conn = create_connection(database)
     cur = conn.cursor()
@@ -226,6 +269,45 @@ def sms():
         return "weird"
 
 
+@app.route('/analysis_monthly', methods=['POST'])
+def analysis_monthly():
+    if request.method == 'POST':
+        username = request.form['username']
+        month = request.form['month']
+        year = request.form['year']
+        v = getAnalysisData(username, month, year)
+        if len(v) == 0:
+            conn = create_connection(database)
+            cur = conn.cursor()
+            cur.execute(""" INSERT INTO logs(username,log)
+                  VALUES(?,?) """, (username, """No user data for month/year: """+month+"""/"""+year))
+            conn.commit()
+            print('notification id:', cur.lastrowid)
+            return "No user data for that month of the year"
+        else:
+            return jsonify(v)
+    else:
+        return "weird"
+
+
+@app.route('/getAllAnalysis', methods=['POST'])
+def getAllAnalysis():  # this is for line graph for daily evaluation..
+    if request.method == 'POST':
+        username = request.form['username']
+        v = getAllAnalysisData(username)
+        if len(v) == 0:
+            conn = create_connection(database)
+            cur = conn.cursor()
+            cur.execute(""" INSERT INTO logs(username,log)
+                  VALUES(?,?) """, (username, "No user data for analysis"))
+            conn.commit()
+            print('notification id:', cur.lastrowid)
+            return "No user data at all"
+        else:
+            return jsonify(v)
+    else:
+        return "weird"
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
     app.run(debug=True)

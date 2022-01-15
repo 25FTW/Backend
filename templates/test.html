@@ -4,19 +4,19 @@
     <meta charset="utf-8">
     <title></title>
   </head>
-  <body>
+  <body>register
     <form class="" action="/register" method="post">
       <input type="text" name="username" value=""  placeholder="username">
       <input type="password" name="pswd" value="" placeholder="password">
       <input type="submit" name="" value="">
     </form>
-    <br><br>
+    <br><br>image data
     <form class="" action="/image" enctype="multipart/form-data" method="post">
       <input type="file" name="imagefile" value=""><br>
       username<input type="text" name="username" value="">
       <input type="submit" name="" value="submit">
     </form>
-    <br><br>
+    <br><br>form data
     <form class="" action="/form" method="post">
       username<input type="text" name="username" value="">
       category <input type="text" name="category" value="">
@@ -30,10 +30,24 @@
     <form class="" action="/setBudget" method="post">
       budget<input type="text" name="budget" value=""><br>username <input type="text" name="username" value=""> <br> <input type="submit" name="" value="submit"><br>
     </form>
-    <br><br>
+    <br><br>get logs
     <form class="" action="/getLogs" method="post">
       username <input type="text" name="username" value=""><br>
       <input type="submit" name="" value="submit">
+    </form>
+
+    <br><br>analysis_monthly
+    <form class="" action="/analysis_monthly" method="post">
+      username <input type="text" name="username" value=""><br>
+      month <input type="text" name="month" value=""><br>
+      year <input type="text" name="year" value=""> <br>
+      <input type="submit" name="" value="submit">
+    </form>
+    <br><br>
+    getAllAnalysis
+    <form class="" action="/getAllAnalysis" method="post">
+      username<input type="text" name="username" value=""><br>
+      <input type="submit" name="" value="">
     </form>
   </body>
 </html>

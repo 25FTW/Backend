@@ -8,6 +8,7 @@ import cv2
 #   from PIL import Image
 import pytesseract
 import numpy as np
+from string import digits
 '''python - m pip install pytesseract
 python - m pip install pyttsx3
 sudo apt install tesseract-ocr
@@ -40,7 +41,7 @@ def runOCR(filename):
     print(result_planes)
     result = cv2.merge(result_planes)
     result_norm = cv2.merge(result_norm_planes)
-    _, img = cv2.threshold(result_norm, 210, 255, cv2.THRESH_BINARY)
+    _,img = cv2.threshold(result_norm, 195, 255, cv2.THRESH_TOZERO)
     #   cv2.imshow('frame', img)
     #   cv2.waitKey(0)
     #   ------conversion------
@@ -64,7 +65,9 @@ def runOCR(filename):
         if res1 and res2:
             o = i.split(' ')
             price.append(o[-1])
-            item.append(" ".join(o[:-1]))
+            remove_digits = str.maketrans('', '', digits)
+            it = " ".join(o[:-1]).translate(remove_digits)  
+            item.append(it)
 
     #       ------Item and price list  ------
     print(item, price)

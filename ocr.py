@@ -60,7 +60,7 @@ def runOCR(filename):
             (chr for chr in i if chr.isdigit()), None) else False
         res2 = True if next(
             (chr for chr in i if chr.isalpha()), None) else False
-        if "total" in i.lower():
+        if "otal" in i.lower():
             break
         if res1 and res2:
             o = i.split(' ')
